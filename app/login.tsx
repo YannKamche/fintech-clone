@@ -40,7 +40,7 @@ const Page = () => {
       <View style={defaultStyles.container}>
         <Text style={defaultStyles.header}>Welcome Back!</Text>
         <Text style={defaultStyles.descriptionText}>
-          Enter your phone number. We will send you a confirmation code there
+          Enter the phone number associated with your account
         </Text>
 
         {/* input container */}
