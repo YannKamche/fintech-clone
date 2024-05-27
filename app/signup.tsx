@@ -2,7 +2,8 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingVi
 import React, { useState } from 'react'
 import { defaultStyles } from '@/constants/Styles';
 import Colors from '@/constants/Colors';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
+import { useSignUp } from '@clerk/clerk-expo';
 
 const Page = () => {
 
@@ -12,7 +13,34 @@ const Page = () => {
   
   const keyboardVerticalOffset = Platform.OS == 'ios' ? 80 : 0;
 
-  const onSignup = async () => { };
+  //implementation of clerk
+  const router = useRouter(); // We will go forward to a new page
+
+  //import signUp from clerk expo
+  const { signUp } = useSignUp();
+
+  //Wrap everything in the try and catch block
+  const onSignup = async () => {
+
+    //pass the full phone number and make it a string
+    const fullPhoneNumber = `${countryCode}${phoneNumber}`;
+    //Navigate to the verification page
+    // router.push({
+    //   pathname: "/verify/[phone]",
+    //   params: { phone: fullPhoneNumber },
+    // });
+
+    try {
+      await signUp!.create({
+        phoneNumber: fullPhoneNumber,
+      });
+      signUp!.preparePhoneNumberVerification();
+      
+      router.push({ pathname: '/verify/[phone]', params: {phone: fullPhoneNumber} });
+    } catch (error) {
+      console.error('Error signing up', error)
+    }
+  };
   
   return (
     <KeyboardAvoidingView
