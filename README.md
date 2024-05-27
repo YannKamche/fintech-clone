@@ -1,8 +1,8 @@
-# FINTECT-CLONE React Native (Expo)
+# FINTECH-CLONE React Native (Expo)
 ## Features
 Background Video and Signup Screens
-OTP Auth with Clerk
-Expo Router Authentication & Tab Bar
+- OTP Auth with Clerk
+- Expo Router Authentication & Tab Bar
 Home Screen with Native Dropdown
 Managing State with Zustand and MMKV
 Drag and Drop Widgets with Gestures
