@@ -3,10 +3,10 @@ import { ClerkProvider, useAuth } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useFonts } from 'expo-font';
-import { Link, Stack, useRouter } from 'expo-router';
+import { Link, Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
-import { TouchableOpacity } from 'react-native';
+import { Text, TouchableOpacity } from 'react-native';
 import 'react-native-reanimated';
 // Clerk needs the publishable key
 const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
@@ -53,7 +53,13 @@ const InitialLayout = () => {
   // useRouter from expo-router
   const router = useRouter();
 
+  /*isLoaded indicates whether the authentication state has finished loading.
+    isSignedIn indicates whether the user is currently signed in.*/
+  
   const { isLoaded, isSignedIn } = useAuth();
+
+  //Understand where we are in our app
+  const segments = useSegments();
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
@@ -68,11 +74,23 @@ const InitialLayout = () => {
 
   //This block is dependent on isSignedIn
   useEffect(() => {
-    console.log('isSignedIn', isSignedIn)
+
+    // If we are not loaded return in the useEffect
+    if (!isLoaded) return;
+    //variable to check if we are found in the authenticated group
+    const inAuthGroup = segments[0] === '(authenticated)';
+
+    //if we are signedIn and still not in the authenticated group (login screen)
+    if (isSignedIn && !inAuthGroup) {
+      router.replace('/(authenticated)/(tabs)/home'); //bring the user to that folder
+    } else if (!isSignedIn) { //if the user is not logged in
+      router.replace('/')
+    }
   }, [isSignedIn])
 
-  if (!loaded) {
-    return null;
+  //Add a text to display loading in case font and user are not totally loaded
+  if (!loaded || !isLoaded) {
+    return <Text>Loading...</Text>;
   }
 
   return (
@@ -132,7 +150,7 @@ const InitialLayout = () => {
 
       {/* customization on the verify page */}
       <Stack.Screen
-        name="verify/[phone]" 
+        name="verify/[phone]"
         options={{
           title: "",
           headerBackTitle: "",
@@ -145,6 +163,11 @@ const InitialLayout = () => {
             </TouchableOpacity>
           ),
         }}
+      />
+      {/* This tab will not have header */}
+      <Stack.Screen
+        name="(authenticated)/(tabs)"
+        options={{ headerShown: false}}
       />
     </Stack>
   );
