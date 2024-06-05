@@ -13,11 +13,18 @@ import { defaultStyles } from "@/constants/Styles";
 import Colors from "@/constants/Colors";
 import { Link, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { isClerkAPIResponseError, useSignIn } from "@clerk/clerk-expo";
+import {
+  isClerkAPIResponseError,
+  useSignIn,
+  useSession,
+} from "@clerk/clerk-expo";
 
 // An enum for the different sign in functionalities
 enum SignInType {
-  Phone, Email, Google, Apple
+  Phone,
+  Email,
+  Google,
+  Apple,
 }
 
 const Page = () => {
@@ -29,38 +36,48 @@ const Page = () => {
 
   const router = useRouter();
   const { signIn } = useSignIn();
+  const { session } = useSession();
 
   const onSignIn = async (type: SignInType) => {
+    if (session) {
+      Alert.alert("Error", "You are already signed in. Please sign out first.");
+      return;
+    }
+
     if (type == SignInType.Phone) {
       try {
         const fullPhoneNumber = `${countryCode}${phoneNumber}`;
 
-        //check the supported factors first
+        // Check the supported factors first
         const { supportedFirstFactors } = await signIn!.create({
           identifier: fullPhoneNumber,
         });
 
-        // check if phone number exists as supported first factor
-        const firstPhoneFactor: any = supportedFirstFactors.find((factor: any) => {
-          return factor.strategy === 'phone_code'
-        });
+        // Check if phone number exists as supported first factor
+        const firstPhoneFactor: any = supportedFirstFactors.find(
+          (factor: any) => {
+            return factor.strategy === "phone_code";
+          }
+        );
 
         const { phoneNumberId } = firstPhoneFactor;
 
         await signIn!.prepareFirstFactor({
-          strategy: 'phone_code',
+          strategy: "phone_code",
           phoneNumberId,
         });
 
         router.push({
-          pathname: '/verify/[phone]',
-          params: { phone: fullPhoneNumber, signin: 'true' }
+          pathname: "/verify/[phone]",
+          params: { phone: fullPhoneNumber, signin: "true" },
         });
       } catch (err) {
-        console.log('error', JSON.stringify(err, null, 2));
+        console.log("error", JSON.stringify(err, null, 2));
         if (isClerkAPIResponseError(err)) {
-          if (err.errors[0].code === 'form_identifier_not_found') {
-            Alert.alert('Error', err.errors[0].message);
+          if (err.errors[0].code === "form_identifier_not_found") {
+            Alert.alert("Error", err.errors[0].message);
+          } else if (err.errors[0].code === "session_exists") {
+            Alert.alert("Error", err.errors[0].longMessage);
           }
         }
       }
@@ -180,7 +197,7 @@ const Page = () => {
         </TouchableOpacity>
 
         {/* Sign in with apple */}
-         <TouchableOpacity
+        <TouchableOpacity
           onPress={() => onSignIn(SignInType.Apple)}
           style={[
             defaultStyles.pillButton,
