@@ -1,6 +1,6 @@
-import Colors from '@/constants/Colors'
-import { FontAwesome } from '@expo/vector-icons'
-import { Tabs } from 'expo-router'
+import Colors from "@/constants/Colors";
+import { FontAwesome } from "@expo/vector-icons";
+import { Tabs } from "expo-router";
 
 const Layout = () => {
   return (
@@ -13,6 +13,9 @@ const Layout = () => {
         name="home"
         options={{
           title: "Home",
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: Colors.background },
+          headerTitleAlign: "center", // Center the title
           tabBarIcon: ({ size, color }) => (
             <FontAwesome name="registered" size={size} color={color} />
           ),
@@ -56,6 +59,6 @@ const Layout = () => {
       />
     </Tabs>
   );
-}
+};
 
-export default Layout
+export default Layout;
