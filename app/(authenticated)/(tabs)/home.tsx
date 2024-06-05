@@ -7,25 +7,41 @@ import { useBalanceStore } from "@/store/balanceStore";
 import { defaultStyles } from "@/constants/Styles";
 import { Ionicons } from "@expo/vector-icons";
 
+interface Transaction {
+  id: string;
+  title: string;
+  amount: number;
+  date: Date;
+}
+
 const Home = () => {
-  //import from zustand
-  const { balance, runTransaction, transactions, clearTransactions } = useBalanceStore();
+  const { balance, runTransaction, transactions, clearTransactions } =
+    useBalanceStore();
 
-  const [isDropdownVisible, setDropdownVisible] = useState(false);
+  const [isDropdownVisible, setDropdownVisible] = useState<boolean>(false);
 
-  // onAddMoney function
   const onAddMoney = () => {
-    // Handle add money functionality
     runTransaction({
       id: Math.random().toString(),
       amount: Math.floor(Math.random() * 1000) * (Math.random() > 0.5 ? 1 : -1),
       date: new Date(),
-      title: 'Added money'
-    })
+      title: "Added money",
+    });
   };
 
   const toggleDropdown = () => {
     setDropdownVisible(!isDropdownVisible);
+  };
+
+  const formatDate = (date: Date) => {
+    const options: Intl.DateTimeFormatOptions = {
+      day: "2-digit",
+      month: "2-digit",
+      year: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    };
+    return date.toLocaleString("en-GB", options);
   };
 
   return (
@@ -60,7 +76,7 @@ const Home = () => {
               No Transactions yet
             </Text>
           )}
-          {transactions.reverse().map((transaction) => (
+          {transactions.reverse().map((transaction: Transaction) => (
             <View
               key={transaction.id}
               style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
@@ -75,7 +91,7 @@ const Home = () => {
               <View style={{ flex: 1 }}>
                 <Text style={{ fontWeight: "400" }}>{transaction.title}</Text>
                 <Text style={{ color: Colors.gray, fontSize: 12 }}>
-                  {new Date(transaction.date).toLocaleDateString()}
+                  {formatDate(new Date(transaction.date))}
                 </Text>
               </View>
 
@@ -123,18 +139,18 @@ const styles = StyleSheet.create({
   transactions: {
     marginHorizontal: 20,
     padding: 14,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 16,
-    gap: 20
+    gap: 20,
   },
   circle: {
     width: 40,
     height: 40,
     borderRadius: 20,
     backgroundColor: Colors.lightGray,
-    justifyContent: 'center',
-    alignItems: 'center'
-  }
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });
 
 export default Home;
