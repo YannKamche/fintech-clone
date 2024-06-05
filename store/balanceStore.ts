@@ -1,8 +1,8 @@
 import { create } from "zustand";
-import { zustandStorage } from "@/store/mmkv-storage";
+import { asyncStorage } from "./secure-storage"; // adjust the path as needed
 import { createJSONStorage, persist } from "zustand/middleware";
 
-//Defining Transaction
+// Defining Transaction
 export interface Transaction {
   id: string;
   title: string;
@@ -11,7 +11,6 @@ export interface Transaction {
 }
 
 // Defining Interface for BalanceState
-
 export interface BalanceState {
   transactions: Array<Transaction>;
   runTransaction: (transaction: Transaction) => void;
@@ -39,7 +38,7 @@ export const useBalanceStore = create<BalanceState>()(
     }),
     {
       name: "balance",
-      storage: createJSONStorage(() => zustandStorage),
+      storage: createJSONStorage(() => asyncStorage),
     }
   )
 );
