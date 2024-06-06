@@ -1,3 +1,5 @@
+// Dropdown.tsx
+
 import React, { useEffect } from "react";
 import {
   View,
@@ -9,53 +11,53 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
-import menuItems, { MenuItem } from "@/constants/MenuItems";
+import menuItems from "@/constants/MenuItems";
 
-const Dropdown: React.FC = () => {
-  const scaleAnimation = new Animated.Value(0); // Start with 0 to make it invisible
+interface DropdownProps {
+  position: { x: number; y: number };
+  onClose: () => void; // New prop for closing the dropdown
+}
+
+const Dropdown: React.FC<DropdownProps> = ({ position, onClose }) => {
+  const scaleAnimation = new Animated.Value(0);
 
   useEffect(() => {
-    // Animate the scale from 0 to 1
     Animated.timing(scaleAnimation, {
       toValue: 1,
-      duration: 300, // Adjust the duration as needed
+      duration: 300,
       easing: Easing.ease,
       useNativeDriver: true,
     }).start();
-  }, []); // Run this effect only once when the component mounts
+  }, []);
+
+  const handleMenuItemClick = () => {
+    onClose(); // Close the dropdown when a menu item is clicked
+  };
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[styles.container, { top: position.y, left: position.x - 200 }]}
+    >
       <Animated.View
         style={[styles.modal, { transform: [{ scale: scaleAnimation }] }]}
       >
         <View style={styles.dropdownContent}>
           {menuItems.map((item, index) => (
-            <React.Fragment key={item.key}>
-              <TouchableOpacity
-                style={styles.menuItem}
-                onPress={() => {
-                  console.log(`${item.title} clicked`);
-                }}
-              >
-                <Text style={styles.menuItemText}>{item.title}</Text>
-                <Ionicons
-                  name={item.icon}
-                  size={24}
-                  style={styles.menuItemIcon}
-                />
-              </TouchableOpacity>
-              {/* Adding the View component below the menu item */}
-              {index < menuItems.length - 1 && (
-                <View
-                  style={{
-                    flex: 1,
-                    height: StyleSheet.hairlineWidth,
-                    backgroundColor: Colors.gray, // Assuming Colors.gray is defined
-                  }}
-                />
-              )}
-            </React.Fragment>
+            <TouchableOpacity
+              key={item.key}
+              style={styles.menuItem}
+              onPress={() => {
+                handleMenuItemClick(); // Call the handler function on press
+                console.log(`${item.title} clicked`);
+              }}
+            >
+              <Text style={styles.menuItemText}>{item.title}</Text>
+              <Ionicons
+                name={item.icon}
+                size={24}
+                style={styles.menuItemIcon}
+              />
+            </TouchableOpacity>
           ))}
         </View>
       </Animated.View>
@@ -66,11 +68,7 @@ const Dropdown: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
-    right: 10,
-    bottom: 90,
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 9999, // Ensure it's on top of every other element
+    zIndex: 9999,
   },
   modal: {
     backgroundColor: "white",

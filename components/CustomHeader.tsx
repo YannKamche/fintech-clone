@@ -18,7 +18,7 @@ const CustomHeader = () => {
     <BlurView intensity={80} tint={"extraLight"} style={{ paddingTop: top }}>
       <View style={styles.container}>
         <TouchableOpacity style={styles.roundBtn}>
-          <Text style={{ color: "#fff", fontWeight: "500", fontSize: 16, textAlign: 'center' }}>
+          <Text style={{ color: "#fff", fontWeight: "500", fontSize: 16,}}>
             SG
           </Text>
         </TouchableOpacity>
@@ -62,6 +62,8 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     backgroundColor: Colors.gray,
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   searchSection: {
     flex: 1,

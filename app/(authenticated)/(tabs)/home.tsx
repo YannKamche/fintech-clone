@@ -1,5 +1,14 @@
-import React, { useState } from "react";
-import { View, Text, ScrollView, StyleSheet } from "react-native";
+// Home.tsx
+
+import React, { useState, useRef } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  UIManager,
+  findNodeHandle,
+} from "react-native";
 import Colors from "@/constants/Colors";
 import RoundBtn from "@/components/RoundBtn";
 import Dropdown from "@/components/Dropdown";
@@ -17,12 +26,17 @@ interface Transaction {
 }
 
 const Home = () => {
-  const { balance, runTransaction, transactions, clearTransactions } = useBalanceStore();
+  const { balance, runTransaction, transactions, clearTransactions } =
+    useBalanceStore();
 
-  // Get the height of the header
   const headerHeight = useHeaderHeight();
-
   const [isDropdownVisible, setDropdownVisible] = useState<boolean>(false);
+  const [dropdownPosition, setDropdownPosition] = useState<{
+    x: number;
+    y: number;
+  }>({ x: 0, y: 0 });
+
+  const moreButtonRef = useRef(null);
 
   const onAddMoney = () => {
     runTransaction({
@@ -34,7 +48,19 @@ const Home = () => {
   };
 
   const toggleDropdown = () => {
-    setDropdownVisible(!isDropdownVisible);
+    if (moreButtonRef.current) {
+      const handle = findNodeHandle(moreButtonRef.current as any); // Assertion to any type
+      if (handle) {
+        UIManager.measure(handle, (x, y, width, height, pageX, pageY) => {
+          setDropdownPosition({ x: pageX, y: pageY + height });
+          setDropdownVisible(!isDropdownVisible);
+        });
+      }
+    }
+  };
+
+  const closeDropdown = () => {
+    setDropdownVisible(false);
   };
 
   const formatDate = (date: Date) => {
@@ -54,7 +80,9 @@ const Home = () => {
         style={styles.scrollView}
         contentContainerStyle={{
           paddingTop: headerHeight,
-      }}>
+        }}
+        onScroll={closeDropdown}
+      >
         <View style={styles.account}>
           <View style={styles.row}>
             <Text style={styles.balance}>{balance()}</Text>
@@ -71,12 +99,12 @@ const Home = () => {
           />
           <RoundBtn text={"Details"} icon={"list"} />
           <RoundBtn
+            ref={moreButtonRef}
             icon={"ellipsis-horizontal"}
             text={"More"}
             onPress={toggleDropdown}
           />
         </View>
-
         <Text style={defaultStyles.sectionHeader}>Transactions</Text>
         <View style={styles.transactions}>
           {transactions.length === 0 && (
@@ -110,7 +138,9 @@ const Home = () => {
         <Text style={defaultStyles.sectionHeader}>Widgets</Text>
         <WidgetList />
       </ScrollView>
-      {isDropdownVisible && <Dropdown />}
+      {isDropdownVisible && (
+        <Dropdown position={dropdownPosition} onClose={closeDropdown} />
+      )}
     </View>
   );
 };
@@ -164,3 +194,4 @@ const styles = StyleSheet.create({
 });
 
 export default Home;
+
