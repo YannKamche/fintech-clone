@@ -13,7 +13,7 @@ const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
 import * as SecureStore from 'expo-secure-store'
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { StatusBar } from 'expo-status-bar';
+import { StatusBar } from 'react-native';
 
 /*Cache the Clerk JWT 
 Tells Clerk to use the below mechanism to store the token*/
@@ -94,82 +94,89 @@ const InitialLayout = () => {
   }
 
   return (
-    <Stack>
-      {/* hides the header of the index page*/}
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-
-      {/* Customization on the signup page */}
-      <Stack.Screen
-        name="signup"
-        options={{
-          title: "",
-          headerBackTitle: "",
-          headerShadowVisible: false,
-          headerStyle: { backgroundColor: Colors.background },
-          // Replace the custom arrow of a page
-          headerLeft: () => (
-            <TouchableOpacity onPress={router.back}>
-              <Ionicons name="arrow-back" size={34} color={Colors.dark} />
-            </TouchableOpacity>
-          ),
-        }}
+    <>
+      <StatusBar
+        barStyle="dark-content"
+        translucent={false}
+        backgroundColor={Colors.background}
       />
-      {/* Customization on the login page */}
-      <Stack.Screen
-        name="login"
-        options={{
-          title: "",
-          headerBackTitle: "",
-          headerShadowVisible: false,
-          headerStyle: { backgroundColor: Colors.background },
-          // Replace the custom arrow of a page
-          headerLeft: () => (
-            <TouchableOpacity onPress={router.back}>
-              <Ionicons name="arrow-back" size={34} color={Colors.dark} />
-            </TouchableOpacity>
-          ),
-          headerRight: () => (
-            <Link href={"/help"} asChild>
-              <TouchableOpacity>
-                <Ionicons
-                  name="help-circle-outline"
-                  size={34}
-                  color={Colors.dark}
-                />
+      <Stack>
+        {/* hides the header of the index page*/}
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+
+        {/* Customization on the signup page */}
+        <Stack.Screen
+          name="signup"
+          options={{
+            title: "",
+            headerBackTitle: "",
+            headerShadowVisible: false,
+            headerStyle: { backgroundColor: Colors.background },
+            // Replace the custom arrow of a page
+            headerLeft: () => (
+              <TouchableOpacity onPress={router.back}>
+                <Ionicons name="arrow-back" size={34} color={Colors.dark} />
               </TouchableOpacity>
-            </Link>
-          ),
-        }}
-      />
+            ),
+          }}
+        />
+        {/* Customization on the login page */}
+        <Stack.Screen
+          name="login"
+          options={{
+            title: "",
+            headerBackTitle: "",
+            headerShadowVisible: false,
+            headerStyle: { backgroundColor: Colors.background },
+            // Replace the custom arrow of a page
+            headerLeft: () => (
+              <TouchableOpacity onPress={router.back}>
+                <Ionicons name="arrow-back" size={34} color={Colors.dark} />
+              </TouchableOpacity>
+            ),
+            headerRight: () => (
+              <Link href={"/help"} asChild>
+                <TouchableOpacity>
+                  <Ionicons
+                    name="help-circle-outline"
+                    size={34}
+                    color={Colors.dark}
+                  />
+                </TouchableOpacity>
+              </Link>
+            ),
+          }}
+        />
 
-      {/*  customization on the help page */}
-      <Stack.Screen
-        name="help"
-        options={{ title: "Help", presentation: "modal" }}
-      />
+        {/*  customization on the help page */}
+        <Stack.Screen
+          name="help"
+          options={{ title: "Help", presentation: "modal" }}
+        />
 
-      {/* customization on the verify page */}
-      <Stack.Screen
-        name="verify/[phone]"
-        options={{
-          title: "",
-          headerBackTitle: "",
-          headerShadowVisible: false,
-          headerStyle: { backgroundColor: Colors.background },
-          // Replace the custom arrow of a page
-          headerLeft: () => (
-            <TouchableOpacity onPress={router.back}>
-              <Ionicons name="arrow-back" size={34} color={Colors.dark} />
-            </TouchableOpacity>
-          ),
-        }}
-      />
-      {/* This tab will not have header */}
-      <Stack.Screen
-        name="(authenticated)/(tabs)"
-        options={{ headerShown: false}}
-      />
-    </Stack>
+        {/* customization on the verify page */}
+        <Stack.Screen
+          name="verify/[phone]"
+          options={{
+            title: "",
+            headerBackTitle: "",
+            headerShadowVisible: false,
+            headerStyle: { backgroundColor: Colors.background },
+            // Replace the custom arrow of a page
+            headerLeft: () => (
+              <TouchableOpacity onPress={router.back}>
+                <Ionicons name="arrow-back" size={34} color={Colors.dark} />
+              </TouchableOpacity>
+            ),
+          }}
+        />
+        {/* This tab will not have header */}
+        <Stack.Screen
+          name="(authenticated)/(tabs)"
+          options={{ headerShown: false }}
+        />
+      </Stack>
+    </>
   );
   
 }
@@ -181,7 +188,6 @@ const RootLayoutNav = () => {
       tokenCache={tokenCache}
     >
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <StatusBar style="light" />
         <InitialLayout />
       </GestureHandlerRootView>
     </ClerkProvider>
