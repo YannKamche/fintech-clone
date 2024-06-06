@@ -7,6 +7,7 @@ import { useBalanceStore } from "@/store/balanceStore";
 import { defaultStyles } from "@/constants/Styles";
 import { Ionicons } from "@expo/vector-icons";
 import WidgetList from "@/components/SortableList/WidgetList";
+import { useHeaderHeight } from "@react-navigation/elements";
 
 interface Transaction {
   id: string;
@@ -16,8 +17,10 @@ interface Transaction {
 }
 
 const Home = () => {
-  const { balance, runTransaction, transactions, clearTransactions } =
-    useBalanceStore();
+  const { balance, runTransaction, transactions, clearTransactions } = useBalanceStore();
+
+  // Get the height of the header
+  const headerHeight = useHeaderHeight();
 
   const [isDropdownVisible, setDropdownVisible] = useState<boolean>(false);
 
@@ -47,7 +50,11 @@ const Home = () => {
 
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.scrollView}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={{
+          paddingTop: headerHeight,
+      }}>
         <View style={styles.account}>
           <View style={styles.row}>
             <Text style={styles.balance}>{balance()}</Text>
