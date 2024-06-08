@@ -19,6 +19,10 @@ import "react-native-reanimated";
 import Colors from "@/constants/Colors";
 import * as SecureStore from "expo-secure-store";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+// tanstack query
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 
 // Clerk needs the publishable key
 const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
@@ -77,15 +81,15 @@ const InitialLayout = () => {
     const inAuthGroup = segments[0] === "(authenticated)";
 
     if (isSignedIn && !inAuthGroup) {
-      router.replace("/(authenticated)/(tabs)/home");
-    // } else if (
-    //   !isSignedIn &&
-    //   !segments.includes("login") &&
-    //   !segments.includes("signup") &&
-    //   !segments.includes("help") &&
-    //   !segments.includes("verify/[phone]")
-    // ) {
-    //   router.replace("/");
+      router.replace("/(authenticated)/(tabs)/crypto");
+      // } else if (
+      //   !isSignedIn &&
+      //   !segments.includes("login") &&
+      //   !segments.includes("signup") &&
+      //   !segments.includes("help") &&
+      //   !segments.includes("verify/[phone]")
+      // ) {
+      //   router.replace("/");
     }
   }, [isSignedIn, isLoaded, segments]);
 
@@ -95,9 +99,7 @@ const InitialLayout = () => {
 
   return (
     <>
-      <StatusBar
-        barStyle="dark-content"
-      />
+      <StatusBar barStyle="dark-content" />
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen
@@ -172,9 +174,11 @@ const RootLayoutNav = () => {
       publishableKey={CLERK_PUBLISHABLE_KEY!}
       tokenCache={tokenCache}
     >
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <InitialLayout />
-      </GestureHandlerRootView>
+      <QueryClientProvider client={queryClient}>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <InitialLayout />
+        </GestureHandlerRootView>
+      </QueryClientProvider>
     </ClerkProvider>
   );
 };
