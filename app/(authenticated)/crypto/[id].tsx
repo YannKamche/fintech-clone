@@ -6,22 +6,52 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
+  TextInput,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { defaultStyles } from "@/constants/Styles";
 import Colors from "@/constants/Colors";
 import { useQuery } from "@tanstack/react-query";
 import { Ionicons } from "@expo/vector-icons";
+import { CartesianChart, Line, useChartPressState } from 'victory-native'
+import { Ticker } from "@/interfaces/crypto";
+import { Circle, useFont } from "@shopify/react-native-skia";
+import { format } from 'date-fns'
+import * as Haptics from 'expo-haptics'
+import Animated, { SharedValue, useAnimatedProps } from "react-native-reanimated";
 
-const categories = ["Overview", "News", "Orders", "Transactions"];
+Animated.addWhitelistedNativeProps({ text: true });
 
+const AnimatedTextInput = Animated.createAnimatedComponent(TextInput)
+
+
+function Tooltip({ x, y }: { x: SharedValue<number>; y: SharedValue<number> }) {
+  return <Circle cx={x} cy={y} r={8} color={Colors.primary} />
+}
 const Page = () => {
+
+  const categories = ["Overview", "News", "Orders", "Transactions"];
+
   const { id } = useLocalSearchParams<{ id: string }>();
   const headerHeight = useHeaderHeight();
 
   const [activeIndex, setActiveIndex] = useState(0);
+
+  //useFont from hook
+  const font = useFont(require('@/assets/fonts/SpaceMono-Regular.ttf'), 12)
+
+  //Press symbol on Chart
+  const { state, isActive } = useChartPressState({
+    x: 0, y: { price: 0 }
+  });
+
+  //This useEffect is called whenever active changes
+  useEffect(() => {
+    console.log(isActive)
+    if (isActive) Haptics.selectionAsync()
+  }, [isActive])
 
   // Tanstack call to get the logo and title
   const { data } = useQuery({
@@ -33,6 +63,28 @@ const Page = () => {
     },
   });
 
+
+  //Query to call the tickers data 
+  const { data: tickers } = useQuery({
+    queryKey: ['tickers'],
+    queryFn: async (): Promise<any[]> => fetch(`/api/tickers`).then((res) => res.json())
+  })
+
+  const animatedText = useAnimatedProps(() => {
+    return {
+      text: `${state.y.price.value.value.toFixed(2)} €`,
+      defaultValue: "",
+    };
+  })
+
+  const animatedDateText = useAnimatedProps(() => {
+    const date = new Date(state.x.value.value)
+    return {
+      text: `${date.toLocaleDateString()}`,
+      defaultValue: '',
+    }
+  })
+
   return (
     <>
       {/* Manually update the vue */}
@@ -40,7 +92,7 @@ const Page = () => {
         options={{
           title: data?.name,
           headerTitleAlign: "center",
-          headerTransparent: true
+          headerTransparent: true,
         }}
       />
       <SectionList
@@ -142,7 +194,89 @@ const Page = () => {
         renderItem={({ item }) => (
           <>
             {/*  CHART */}
-            <View style={{ height: 500, backgroundColor: "green" }}></View>
+            <View style={[defaultStyles.block, { height: 500 }]}>
+              {tickers && (
+                <>
+                  {!isActive && (
+                    <View>
+                      <Text
+                        style={{
+                          fontSize: 30,
+                          fontWeight: "bold",
+                          color: Colors.dark,
+                        }}
+                      >
+                        {tickers[tickers.length - 1].price.toFixed(2)} €
+                      </Text>
+                      <Text
+                        style={{
+                          fontSize: 18,
+                          color: Colors.gray,
+                        }}
+                      >
+                        Today
+                      </Text>
+                    </View>
+                  )}
+
+                  {isActive && (
+                    <View>
+                      <AnimatedTextInput
+                        editable={false}
+                        style={{
+                          fontSize: 30,
+                          fontWeight: "bold",
+                          color: Colors.dark,
+                        }}
+                        underlineColorAndroid={"transparent"}
+                        animatedProps={animatedText}
+                      ></AnimatedTextInput>
+
+                      <AnimatedTextInput
+                        editable={false}
+                        style={{
+                          fontSize: 18,
+                          color: Colors.gray,
+                        }}
+                        underlineColorAndroid={"transparent"}
+                        animatedProps={animatedDateText}
+                      >
+                  </AnimatedTextInput>
+                    </View>
+                  )}
+                  <CartesianChart
+                    chartPressState={state}
+                    data={tickers!}
+                    xKey="timestamp"
+                    yKeys={["price"]}
+                    axisOptions={{
+                      font,
+                      tickCount: 5,
+                      labelOffset: { x: -2, y: 0 },
+                      labelColor: Colors.gray,
+                      formatYLabel: (v) => `${v} €`,
+                      formatXLabel: (ms) => format(new Date(ms), "MM/yy"),
+                    }}
+                  >
+                    {({ points }) => (
+                      <>
+                        <Line
+                          points={points.price}
+                          color={Colors.primary}
+                          strokeWidth={3}
+                        />
+                        {isActive && (
+                          <Tooltip
+                            x={state.x.position}
+                            y={state.y.price.position}
+                          />
+                        )}
+                      </>
+                    )}
+                  </CartesianChart>
+                </>
+              )}
+            </View>
             <View style={[defaultStyles.block, { marginTop: 20 }]}>
               <Text style={styles.subtitle}>Overview</Text>
               <Text style={{ color: Colors.gray }}>
