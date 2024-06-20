@@ -21,6 +21,7 @@ import * as SecureStore from "expo-secure-store";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 // tanstack query
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { UserInactivityProvider } from "@/context/UserInactivity";
 
 const queryClient = new QueryClient();
 
@@ -174,7 +175,7 @@ const InitialLayout = () => {
             ),
             headerTransparent: true,
             headerLargeTitle: true,
-            headerStyle: { backgroundColor: Colors.background},
+            headerStyle: { backgroundColor: Colors.background },
             headerRight: () => (
               <View style={{ flexDirection: "row", gap: 10 }}>
                 <TouchableOpacity>
@@ -191,6 +192,10 @@ const InitialLayout = () => {
             ),
           }}
         />
+        <Stack.Screen
+          name="(authenticated)/(modals)/lock"
+          options={{ headerShown: false, animation: "none" }}
+        />
       </Stack>
     </>
   );
@@ -203,9 +208,11 @@ const RootLayoutNav = () => {
       tokenCache={tokenCache}
     >
       <QueryClientProvider client={queryClient}>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <InitialLayout />
-        </GestureHandlerRootView>
+        <UserInactivityProvider>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <InitialLayout />
+          </GestureHandlerRootView>
+        </UserInactivityProvider>
       </QueryClientProvider>
     </ClerkProvider>
   );
